@@ -1,13 +1,24 @@
 name: learn-github-actions
 run-name: ${{ github.actor }} is learning GitHub Actions
-on: [push]
+on: [pull_request]
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
 jobs:
-  check-bats-version:
+  add-label:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Add Label to Pull Request
+      - uses: actions/github-script@v7
         with:
-          node-version: '20'
-      - run: npm install -g bats
-      - run: bats -v
+          script: |
+          const label = ["enhancement", "test"];
+          const pull_number = context.issue.number;
+
+          await github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: pull_number,
+            labels: [label]
+            });
